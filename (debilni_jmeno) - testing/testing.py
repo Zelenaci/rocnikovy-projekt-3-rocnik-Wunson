@@ -17,8 +17,8 @@ def turn(x,y):
 
 pole = []
 for x in range(0,10):
+    row = []
     for y in range(0,10):
-        row = []
         tile_x = 0
         tile_y = 0
         tile_pad = 5
@@ -38,5 +38,5 @@ for x in range(0,10):
     pole.append(row)
 
 
-pole[0][1].configure(bg = "red")
+pole[0][0].configure(bg = "red")
 window.mainloop()
