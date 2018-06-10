@@ -15,8 +15,10 @@ window.geometry("".join(wd_size))
 def turn(x,y):
     print(x,y)
 
+pole = []
 for x in range(0,10):
     for y in range(0,10):
+        row = []
         tile_x = 0
         tile_y = 0
         tile_pad = 5
@@ -25,15 +27,16 @@ for x in range(0,10):
         tile = tk.Button(window,
                          bd = 0,
                          bg = "blue",
-                         command = partial(turn, x, y))
-        
-        
-        
+                         command = partial(turn, x+1, y+1))
         
         tile.place(x = tile_x + x * (tile_square + tile_pad),
                    y = tile_y + y * (tile_square + tile_pad),
                    width = tile_square,
                    height = tile_square,
                    )
+        row.append(tile)
+    pole.append(row)
 
+
+pole[0][1].configure(bg = "red")
 window.mainloop()
