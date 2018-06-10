@@ -17,6 +17,9 @@ brigth_red = (255,0,0)
 bright_green = (0,255,0)
 bright_blue = (0,0,255)
 
+bg_light_blue = (80,176,255)
+button_gray = (224,224,224)
+button_gray_mouse  =(192,192,192)
 #Definování fontů pro texty
 small_button_text = pygame.font.SysFont("comicsansms",20)    #(font,size)
 largetext = pygame.font.Font("freesansbold.ttf" ,115)
@@ -75,5 +78,27 @@ def test_screen():
         pygame.display.update()   #redner things to screen
         
         clock.tick(15) #15 FPS
+
+def main_menu():
+    m_menu = True
+    while m_menu: #very important to have a cycle!!!
+    
+        for event in pygame.event.get(): #so it can be closed
+            if event == pygame.QUIT:
+                m_menu = False
+                quit_game()
+                
+                
+        window.fill(bg_light_blue)
+        render_text("Lodě",largetext,wd_widht//2,wd_height//3) #text text
+        
+        button("Play",button_gray,button_gray_mouse,wd_widht//2,(wd_height//2)+50,150,30,quit_game) #test buton
+        
+        
+        pygame.display.update()   #redner things to screen
+        
+        clock.tick(15) #15 FPS
              
-test_screen() 
+main_menu()
+pygame.quit()
+quit()
