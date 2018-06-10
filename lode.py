@@ -7,23 +7,39 @@ Created on Sat Jun  9 17:34:02 2018
 
 import socket
 
+MAX_BUFFER_SIZE = 4096
 
-#_____Server_________________________________________________________________#
-def client_thread(conn, ip, port, MAX_BUFFER_SIZE = 4096):
-    input_from_client_bytes = conn.recv(MAX_BUFFER_SIZE)
 
-    import sys
-    siz = sys.getsizeof(input_from_client_bytes)
-    if  siz >= MAX_BUFFER_SIZE:
-        print("The length of input is probably too long: {}".format(siz))
+#_____Server______________________________________________________________________________________#
 
-    # decode input and strip the end of line
-    input_from_client = input_from_client_bytes.decode("utf8").rstrip()
-    res = main(input_from_client)
-    vysl = res.encode("utf8")  # encode the result string
-    conn.sendall(vysl)  # send it to client
-    conn.close()
-    print('Connection ' + ip + ':' + port + " ended")
+def rx(soc):  
+    data = []
+    while True:
+        rx_data_bytes = soc.recv(MAX_BUFFER_SIZE)
+        rx_data = rx_data_bytes.decode("utf8").rstrip()
+       
+        if "--END--" in rx_data:                # Konec prenosu
+            return data
+        else:
+            data.append(rx_data)
+            soc.sendall("-".encode("utf8"))     # Ready for another data
+
+def tx(soc, data):
+    for x in data:
+        msg = "{}\t".format(x)
+        soc.sendall(msg.encode("utf8"))
+        if soc.recv(MAX_BUFFER_SIZE).decode("utf8") == "-":    # Wait for response
+            pass
+    soc.send(b'--END--')
+
+#_________________________________________________________________________________________________#
+
+def client_thread(conn, ip, port):
+        my_array = rx(conn)
+        tx(conn, ["Success", 1, 2, "nejaka data", "funguje to!"])
+        print(my_array)
+        print('Connection ' + ip + ':' + port + " ended")
+        conn.close()
 
 def start_server():
     local_IP = ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] 
@@ -43,10 +59,8 @@ def start_server():
         sys.exit()
     
     soc.listen(10)
-
-    # for handling task in separate jobs we need threading
+    
     from threading import Thread
-
     while True:
         conn, addr = soc.accept()
         ip, port = str(addr[0]), str(addr[1])
@@ -59,51 +73,46 @@ def start_server():
     soc.close()
 
 
-
-#_____Client_________________________________________________________________#
-def start_client(server_ip):
-    while True:    
-        soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-        
-        try:
-            soc.connect((server_ip, 666))
-        except:
-            print("Error, nespravna IP!")
-            break
+#_____Client______________________________________________________________________________________#
+def client(server_ip, data = []):    
+    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+    try:
+        soc.connect((server_ip, 666))
+    except:
+        return("Error, connection failed!")
     
-        clients_input = input("Zprava pro server: ")
-        
-        try:
-            soc.send(clients_input.encode("utf8"))
-        except:
-            print("Pada server, neco si prej...")
-            break
-        
-        respone = soc.recv(4096)                    # max message size
-        result_string = respone.decode("utf8")
-        print("Odpoved od serveru:" + result_string)
-
-#_____Main____________________________________________________________________#
-
-def main(input_string = "xxx"):  
-    
-    output_string = input("Zprava pro klienta> ")
-    
-    return output_string
+    tx(soc, data)
+    response = rx(soc)
+    return(response)
 
 
+#_____Main________________________________________________________________________________________#
 
 mode = input("Server, nebo klient> ")
 
-if(mode == "server"):
+if mode == "server":
     start_server()
     
 else:
     while True:
         server_ip = input("Zadejte IP serveru> ")
-        start_client(server_ip)
-
-
+        response = client(server_ip)
+        
+        if "Error, connection failed!" in response:
+            print(response)
+        
+        else:
+            data = []
+            while True:
+                user_input = input(">")
+                
+                if "^" in user_input:
+                    response = client(server_ip, data)
+                    print(response)
+                    data = []
+                    
+                else:
+                    data.append(user_input)
 
 # Vlastni hraci pole
 my_array = []

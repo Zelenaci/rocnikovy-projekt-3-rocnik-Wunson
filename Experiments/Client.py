@@ -15,6 +15,7 @@ def client():
         soc.connect(("10.0.0.35", 666))
     
         clients_input = main()
-        soc.send(clients_input)
-        respone = soc.recv(4096)                    # max message size
-        result_string = respone.decode("utf8")
+        soc.send(clients_input.encode("utf8"))
+        #soc.send(clients_input.encode("utf8")) # we must encode the string to bytes  
+        result_bytes = soc.recv(4096) # the number means how the response can be in bytes  
+        result_string = result_bytes.decode("utf8") # the return will be in bytes, so decode  
