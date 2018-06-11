@@ -42,15 +42,16 @@ wd_size =(str(wd_width),"x",str(wd_height))
 window.geometry("".join(wd_size))
 
 def place_ships(x,y):
-    ship_counter = 0
+    global ship_counter
+    global game_grid
     if game_grid[x][y] == 0 and ship_counter < 20:
         game_grid[x][y] = 1
         pole[x][y].configure(bg = "black")
         ship_counter += 1
     
-    if game_grid[x][y] == 1 and ship_counter > 0:
+    elif game_grid[x][y] == 1 and ship_counter > 0:
         game_grid[x][y] = 0
-        pole[x][y].configure(bg = "black")
+        pole[x][y].configure(bg = sea_blue)
         ship_counter -= 1 
 
 
