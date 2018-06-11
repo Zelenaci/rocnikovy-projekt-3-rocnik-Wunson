@@ -1,11 +1,6 @@
 import tkinter as tk
 from functools import partial
 
-
-global game_grid
-global ship_counter
-global pole
-
 ship_counter = 0
 
 pole = []
@@ -21,6 +16,8 @@ game_grid =        [[0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0]]
 
+ip_host = 0
+ip_join = 0
 
 #____Colors___________________________________________________________________#
 bg_blue = "#3CAEE5"
@@ -120,11 +117,25 @@ def main_menu():
             
 #_____Host window_____________________________________________________________#
 def host_wd():
-    pass
+    global ip_host
+    
+    title = tk.Label(window,
+                     text = str(ip_host),
+                     font = ("times",36))
+    
+    title.place(x = 0,
+                y = 0)
 
 #_____Join window_____________________________________________________________#
 def join_wd():
-    pass
+    global ip_join
+    
+    ip = tk.Entry(window,
+                  )
+    ip.place(x = 0,
+             y = 0)
+    
+    ip_join = ip.get()
 
 #_____Place ships_____________________________________________________________#
 def place_wd():
@@ -137,5 +148,5 @@ def place_wd():
     
     
     
-place_wd()
+main_menu(a)
 window.mainloop()
