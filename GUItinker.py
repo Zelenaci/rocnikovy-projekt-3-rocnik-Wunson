@@ -93,7 +93,7 @@ def main_menu():
                      bd = 0,
                      bg = menubuton_bg,
                      activebackground = menubuton_activebg,
-                     command = host_wd(),
+                     command = host_wd,
                      )
     host.place(x = (wd_width/2)-50,
                y = wd_height/4,
@@ -107,7 +107,7 @@ def main_menu():
                      bg = menubuton_bg,
                      bd = 0,
                      activebackground = menubuton_activebg,
-                     command = join_wd(),
+                     command = join_wd,
                      )
     join.place(x = (wd_width/2)-50,
                y = 2*wd_height/4,
@@ -148,5 +148,5 @@ def place_wd():
     
     
     
-main_menu(a)
+main_menu()
 window.mainloop()
