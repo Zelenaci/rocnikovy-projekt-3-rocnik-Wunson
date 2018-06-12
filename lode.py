@@ -240,12 +240,12 @@ def host_wd(widgets):
                      fg = "white"
                      )
     
-    label.grid(row = 0,
+    ip_label.grid(row = 0,
                column = 1)
     
     widgets.append(ip_label)
     
-    start = tk.Buttons(window,
+    start = tk.Button(window,
                        text = "Start",
                        font =("Arial Black",30),
                        bd = 0,
