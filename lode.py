@@ -8,6 +8,7 @@ Created on Tue Jun 12 16:56:14 2018
 import socket
 from threading import Thread
 
+ip_adr = ""
 MAX_BUFFER_SIZE = 4096
 ship_counter = 0
 pole = []
@@ -84,7 +85,7 @@ def start_server(local_IP):
 
 
 #_____Client______________________________________________________________________________________#
-def client(server_ip = "10.0.0.35", data = []):    
+def client(server_ip = "192.168.1.144", data = []):    
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
     try:
         soc.connect((server_ip, 666))
@@ -204,6 +205,12 @@ def main_menu(widgets = []):
 def killer(widgets):
     for i in widgets:
         i.destroy()
+        
+def ip_get(entry):
+    global ip_adr
+    ip_adr = entry.get()
+    print(ip_adr)
+    
 
 #_____Place ships_____________________________________________________________#
 def place_wd(widgets):
@@ -241,7 +248,7 @@ def host_wd(widgets):
                      )
     
     ip_label.grid(row = 0,
-               column = 1)
+                  column = 1)
     
     widgets.append(ip_label)
     
@@ -265,16 +272,31 @@ def host_wd(widgets):
 #_____Join window_____________________________________________________________#
 def join_wd(buttons):
     global ip_adr
-    
-    ip = tk.Entry(window)
-    ip.place(x = 0, y = 0)
-    ip_adr = ip.get()
     killer(buttons)
     
-    place_wd()
+    ip = tk.Entry(window,)
+    
+    ip.grid(window,
+            row = 0,
+            column = 0,)
+    
+    confirm = tk.Button(window,
+                       text = "confirm",
+                       font =("Arial Black"),
+                       bd = 0,
+                       fg = "white",
+                       bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(ip_get,ip))
+    
+    confirm.grid(window,
+                 row = 0,
+                 column = 1,)
+    
+    
     
 
-#_____Main________________________________________________________________________________________#
+#_____Main____________________________________________________________________#
 
 main_menu()
 window.mainloop()
