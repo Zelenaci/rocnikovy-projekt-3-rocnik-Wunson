@@ -108,6 +108,8 @@ menubuton_bg = "#BED5E1"
 sea_blue = "#3496C5"
 act_sea_blue = "#2380AC"
 
+
+
 # Window
 window = tk.Tk()
 
@@ -164,7 +166,7 @@ def button_grid(function):
         pole.append(row)
 
 #_____Main menu_______________________________________________________________#
-def main_menu():
+def main_menu(widgets = []):
     window.configure(background = bg_blue)
     
     widgets = []
@@ -184,7 +186,7 @@ def main_menu():
     for i in range(0, 2):
         widgets.append(tk.Button(window,
                      text = labels[i],
-                     font =("Arial",30),
+                     font =("Arial Black",30),
                      bd = 0,
                      fg = "white",
                      bg = sea_blue,
@@ -199,22 +201,66 @@ def main_menu():
     widgets.append(title)
 
 #_____Killer__________________________________________________________________#
-def del_buttons(widgets):
+def killer(widgets):
     for i in widgets:
         i.destroy()
 
 #_____Place ships_____________________________________________________________#
-def place_wd():
+def place_wd(widgets):
+    killer(widgets)
     button_grid(place_ships)
 
 #_____Host window_____________________________________________________________#
-def host_wd(buttons):
+def host_wd(widgets):
+    killer(widgets)
+    
     local_IP = get_local_IP()
     Thread(target=start_server, args=(local_IP,)).start()
     
-    title = tk.Label(window, text = local_IP, font = ("times",36))
-    title.place(x = 0, y = 0)
-    del_buttons(buttons)
+    window.configure(background = bg_blue)
+    
+    widgets = []
+    
+    label = tk.Label(window,
+                     text = "your ip is:",
+                     font =("Arial Black",20),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    label.grid(row = 0,
+               column = 0)
+    
+    widgets.append(label)
+    
+    ip_label = tk.Label(window,
+                     text = local_IP,
+                     font =("Arial Black",20),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    label.grid(row = 0,
+               column = 1)
+    
+    widgets.append(ip_label)
+    
+    start = tk.Buttons(window,
+                       text = "Start",
+                       font =("Arial Black",30),
+                       bd = 0,
+                       fg = "white",
+                       bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(place_wd, widgets))
+    
+    start.place(x = (wd_width/2)-75,
+                y = (wd_height/3),
+                width = 150,
+                height = 75)
+    
+    widgets.append(start)
+    
 
 #_____Join window_____________________________________________________________#
 def join_wd(buttons):
@@ -223,7 +269,7 @@ def join_wd(buttons):
     ip = tk.Entry(window)
     ip.place(x = 0, y = 0)
     ip_adr = ip.get()
-    del_buttons(buttons)
+    killer(buttons)
     
     place_wd()
     
