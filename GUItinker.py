@@ -2,9 +2,7 @@ import tkinter as tk
 from functools import partial
 
 ship_counter = 0
-
 pole = []
-
 game_grid =        [[0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
@@ -16,8 +14,7 @@ game_grid =        [[0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0]]
 
-ip_host = 0
-ip_join = 0
+ip_adr = ""
 
 #____Colors___________________________________________________________________#
 bg_blue = "#3CAEE5"
@@ -81,61 +78,34 @@ def main_menu():
     #change background
     window.configure(background = bg_blue)
     
-    #title = tk.Label(window,
-    #                 text = "LODĚ (woow)")
+    buttons = []
+    labels = ["Host", "Join"]
     
-    #title.place(x = wd_width/2,
-    #            y = 0)
-    
-    host = tk.Button(window,
-                     text = "Host",
+    for i in range(0, 2):
+        buttons.append(tk.Button(window,
+                     text = labels[i],
                      font =("Arial",30),
                      bd = 0,
                      bg = menubuton_bg,
                      activebackground = menubuton_activebg,
-                     command = host_wd,
-                     )
-    host.place(x = (wd_width/2)-50,
-               y = wd_height/4,
+                     command = partial(host_wd, buttons)))    
+    
+        buttons[i].place(x = (wd_width/2)-50,
+               y = (i+1)*wd_height/4,
                width = 100,
-               height = 50,
-               )
-    
-    join = tk.Button(window,
-                     text = "Join",
-                     font =("Arial",30),
-                     bg = menubuton_bg,
-                     bd = 0,
-                     activebackground = menubuton_activebg,
-                     command = join_wd,
-                     )
-    join.place(x = (wd_width/2)-50,
-               y = 2*wd_height/4,
-               width = 100,
-               height = 50,
-               )
-            
-#_____Host window_____________________________________________________________#
-def host_wd():
-    global ip_host
-    
-    title = tk.Label(window,
-                     text = str(ip_host),
-                     font = ("times",36))
-    
-    title.place(x = 0,
-                y = 0)
+               height = 50)
 
-#_____Join window_____________________________________________________________#
-def join_wd():
-    global ip_join
-    
-    ip = tk.Entry(window,
-                  )
-    ip.place(x = 0,
-             y = 0)
-    
-    ip_join = ip.get()
+
+
+
+
+
+
+
+def del_buttons(buttons):
+    for i in buttons:
+        i.destroy()
+
 
 #_____Place ships_____________________________________________________________#
 def place_wd():
@@ -143,10 +113,27 @@ def place_wd():
     window.configure(background = bg_blue)
     
     button_grid(place_ships)
+
+#_____Host window_____________________________________________________________#
+def host_wd(buttons):
+    global ip_adr
+    
+    title = tk.Label(window, text = str(ip_adr), font = ("times",36))
+    title.place(x = 0, y = 0)
+    
+    del_buttons(buttons)
+
+#_____Join window_____________________________________________________________#
+def join_wd(buttons):
+    global ip_adr
+    
+    ip = tk.Entry(window)
+    ip.place(x = 0, y = 0)
+    ip_adr = ip.get()
+    
+    del_buttons(buttons)
     
     
-    
-    
-    
-main_menu()
+place_wd()    
+#main_menu()
 window.mainloop()
