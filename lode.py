@@ -274,9 +274,23 @@ def join_wd(widgets):
     global ip_adr
     killer(widgets)
     
+    ip_label = tk.Label(window,
+                     text = "connect to:",
+                     font =("Arial Black",10),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    ip_label.grid(row = 0,
+                  column = 0)
+    
+    widgets.append(ip_label)
+    
+    
+    
     ip = tk.Entry(window)
     
-    ip.grid(row = 0, column = 0,)
+    ip.grid(row = 0, column = 1,)
     
     widgets.append(ip)
     
@@ -291,9 +305,11 @@ def join_wd(widgets):
                        )
     
     confirm.grid(row = 0, 
-                 column = 1,)
+                 column = 2,)
     
     widgets.append(confirm)
+    
+    
     
     connect = tk.Button(window,
                       text = "Connect",
