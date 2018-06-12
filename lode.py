@@ -270,13 +270,15 @@ def host_wd(widgets):
     
 
 #_____Join window_____________________________________________________________#
-def join_wd(buttons):
+def join_wd(widgets):
     global ip_adr
-    killer(buttons)
+    killer(widgets)
     
     ip = tk.Entry(window)
     
     ip.grid(row = 0, column = 0,)
+    
+    widgets.append(ip)
     
     confirm = tk.Button(window,
                        text = "confirm",
@@ -288,8 +290,26 @@ def join_wd(buttons):
                        command = partial(ip_get,ip)
                        )
     
-    confirm.grid(row = 0, column = 1,)
+    confirm.grid(row = 0, 
+                 column = 1,)
     
+    widgets.append(confirm)
+    
+    connect = tk.Button(window,
+                      text = "Connect",
+                      font =("Arial Black",30),
+                      bd = 0,
+                      fg = "white",
+                      bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(place_wd, widgets))
+    
+    connect.place(x = (wd_width/2)-100,
+                y = (wd_height/3),
+                width = 200,
+                height = 75)
+    
+    widgets.append(connect)
     
     
 
