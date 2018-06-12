@@ -167,29 +167,40 @@ def button_grid(function):
 def main_menu():
     window.configure(background = bg_blue)
     
-    buttons = []
+    widgets = []
     labels = ["Host", "Join"]
     commands = [host_wd, join_wd]
     
+    title = tk.Label(window,
+                     text = "MÍSTO DRŽEČ",
+                     font =("Arial Black",50),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    title.pack()
+    
+    
     for i in range(0, 2):
-        buttons.append(tk.Button(window,
+        widgets.append(tk.Button(window,
                      text = labels[i],
                      font =("Arial",30),
                      bd = 0,
                      fg = "white",
                      bg = sea_blue,
                      activebackground = act_sea_blue,
-                     command = partial(commands[i], buttons)))    
+                     command = partial(commands[i], widgets)))    
     
-        buttons[i].place(x = (wd_width/2)-75,
-               y = (i+1)*wd_height/4,
+        widgets[i].place(x = (wd_width/2)-75,
+               y = ((i+1)*wd_height/4) + 75,
                width = 150,
                height = 75)
+        
+    widgets.append(title)
 
-
-#_____Place ships_____________________________________________________________#
-def del_buttons(buttons):
-    for i in buttons:
+#_____Killer__________________________________________________________________#
+def del_buttons(widgets):
+    for i in widgets:
         i.destroy()
 
 #_____Place ships_____________________________________________________________#
