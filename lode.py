@@ -176,14 +176,15 @@ def main_menu():
                      text = labels[i],
                      font =("Arial",30),
                      bd = 0,
-                     bg = menubuton_bg,
-                     activebackground = menubuton_activebg,
+                     fg = "white",
+                     bg = sea_blue,
+                     activebackground = act_sea_blue,
                      command = partial(commands[i], buttons)))    
     
-        buttons[i].place(x = (wd_width/2)-50,
+        buttons[i].place(x = (wd_width/2)-75,
                y = (i+1)*wd_height/4,
-               width = 100,
-               height = 50)
+               width = 150,
+               height = 75)
 
 
 #_____Place ships_____________________________________________________________#
