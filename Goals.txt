@@ -1,5 +1,6 @@
 ﻿nicknames
 connection log
+start game only if player connected
 
 
 
