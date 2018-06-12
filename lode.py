@@ -274,24 +274,21 @@ def join_wd(buttons):
     global ip_adr
     killer(buttons)
     
-    ip = tk.Entry(window,)
+    ip = tk.Entry(window)
     
-    ip.grid(window,
-            row = 0,
-            column = 0,)
+    ip.grid(row = 0, column = 0,)
     
     confirm = tk.Button(window,
                        text = "confirm",
-                       font =("Arial Black"),
+                       font = ("Arial Black", 10),
                        bd = 0,
                        fg = "white",
                        bg = sea_blue,
                        activebackground = act_sea_blue,
-                       command = partial(ip_get,ip))
+                       command = partial(ip_get,ip)
+                       )
     
-    confirm.grid(window,
-                 row = 0,
-                 column = 1,)
+    confirm.grid(row = 0, column = 1,)
     
     
     
