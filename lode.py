@@ -12,8 +12,9 @@ ip_adr = ""
 MAX_BUFFER_SIZE = 4096
 PORT = 1025
 ship_counter = 0
-pole = []
-game_grid =        [[0,0,0,0,0,0,0,0,0,0],
+my_pole = []
+enemy_pole = []
+my_grid =          [[0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
@@ -128,34 +129,27 @@ window.geometry("".join(wd_size))
 
 def place_ships(x,y):
     global ship_counter
-    global game_grid
-    if game_grid[x][y] == 0 and ship_counter < 20:
-        game_grid[x][y] = 1
-        pole[x][y].configure(bg = "black")
+    global my_grid
+    if my_grid[x][y] == 0 and ship_counter < 20:
+        my_grid[x][y] = 1
+        my_pole[x][y].configure(bg = "black")
         ship_counter += 1
-        
-        #####_Test_###############
-        response = client(server_ip=ip_adr, data=["shot", x, y])
-        print(response)
-        ##########################
     
-    elif game_grid[x][y] == 1 and ship_counter > 0:
-        game_grid[x][y] = 0
-        pole[x][y].configure(bg = sea_blue)
+    elif my_grid[x][y] == 1 and ship_counter > 0:
+        my_grid[x][y] = 0
+        my_pole[x][y].configure(bg = sea_blue)
         ship_counter -= 1
 
 # generate buton grid with function in them
-def button_grid(function):   
+def button_grid(function,tile_x = 0,tile_y = 0, pole = my_pole):   
     for x in range(0,10):
         row = []
         for y in range(0,10):
-            tile_x = 0
-            tile_y = 0
             tile_pad = 1
             tile_square = 50
             
             tile = tk.Button(window,
-                             bd = 0,
+                             bd  = 0,
                              bg = sea_blue,
                              activebackground = act_sea_blue,
                              command = partial(function, x, y))
@@ -168,6 +162,18 @@ def button_grid(function):
             row.append(tile)
         pole.append(row)
 
+#_____Killer__________________________________________________________________#
+def killer(widgets):
+    for i in widgets:
+        i.destroy()
+        
+def ip_get(entry):
+    global ip_adr
+    ip_adr = entry.get()
+    response = client(ip_adr)
+    
+    print(response)
+    
 #_____Main menu_______________________________________________________________#
 def main_menu(widgets = []):
     window.configure(background = bg_blue)
@@ -203,23 +209,6 @@ def main_menu(widgets = []):
         
     widgets.append(title)
 
-#_____Killer__________________________________________________________________#
-def killer(widgets):
-    for i in widgets:
-        i.destroy()
-        
-def ip_get(entry):
-    global ip_adr
-    ip_adr = entry.get()
-    response = client(ip_adr)
-    
-    print(response)
-    
-
-#_____Place ships_____________________________________________________________#
-def place_wd(widgets):
-    killer(widgets)
-    button_grid(place_ships)
 
 #_____Host window_____________________________________________________________#
 def host_wd(widgets):
@@ -259,7 +248,7 @@ def host_wd(widgets):
     start = tk.Button(window,
                        text = "Start",
                        font =("Arial Black",30),
-                       bd = 0,
+                       bd  = 0,
                        fg = "white",
                        bg = sea_blue,
                        activebackground = act_sea_blue,
@@ -301,7 +290,7 @@ def join_wd(widgets):
     confirm = tk.Button(window,
                        text = "Connect",
                        font = ("Arial Black", 10),
-                       bd = 0,
+                       bd  = 0,
                        fg = "white",
                        bg = sea_blue,
                        activebackground = act_sea_blue,
@@ -318,7 +307,7 @@ def join_wd(widgets):
     connect = tk.Button(window,
                       text = "Start",
                       font =("Arial Black",30),
-                      bd = 0,
+                      bd  = 0,
                       fg = "white",
                       bg = sea_blue,
                        activebackground = act_sea_blue,
@@ -331,7 +320,38 @@ def join_wd(widgets):
     
     widgets.append(connect)
     
+
+#_____Place ships_____________________________________________________________#
+def place_wd(widgets):
+    killer(widgets)
+    button_grid(place_ships,tile_y = 60,)
     
+    title = tk.Label(window,
+                     text = "Place your ships",
+                     font =("Arial Black",30),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    title.pack()
+
+
+
+#_____Place ships_____________________________________________________________#
+def game_wd(widgets):
+    killer(widgets)
+    button_grid(place_ships)
+    button_grid(place_ships,tile_x = 600,tile_y = 0, pole = enemy_pole)
+        
+    
+    
+    wd_width = 1150
+    wd_height = 600
+    wd_size =(str(wd_width),"x",str(wd_height))
+    window.geometry("".join(wd_size))
+
+
+
 
 #_____Main____________________________________________________________________#
 
