@@ -176,6 +176,16 @@ def ip_get(entry):
     
 #_____Main menu_______________________________________________________________#
 def main_menu(widgets = []):
+    
+    try:
+        for row in my_pole:
+            for i in row:
+                i.destroy()
+    except:
+        pass
+    
+    killer(widgets)
+    
     window.configure(background = bg_blue)
     
     widgets = []
@@ -259,6 +269,20 @@ def host_wd(widgets):
     
     widgets.append(start)
     
+    back = tk.Button(window,
+                       text = "Back",
+                       font =("Arial Black",10),
+                       bd  = 0,
+                       fg = "white",
+                       bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(main_menu, widgets))
+    
+    back.place(x = 0,
+               y = wd_height - 25
+               )
+    
+    widgets.append(back)
 
 #_____Join window_____________________________________________________________#
 def join_wd(widgets):
@@ -300,9 +324,19 @@ def join_wd(widgets):
     
     widgets.append(confirm)
     
+    ip_label = tk.Label(window,
+                     text = "Connect to:",
+                     font =("Arial Black",10),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
     
+    ip_label.grid(row = 0,
+                  column = 0)
     
-    connect = tk.Button(window,
+    widgets.append(ip_label)
+    
+    start = tk.Button(window,
                       text = "Start",
                       font =("Arial Black",30),
                       bd  = 0,
@@ -311,13 +345,43 @@ def join_wd(widgets):
                        activebackground = act_sea_blue,
                        command = partial(place_wd, widgets))
     
-    connect.place(x = (wd_width/2)-100,
+    start.place(x = (wd_width/2)-100,
                 y = (wd_height/3),
                 width = 200,
                 height = 75)
     
-    widgets.append(connect)
+    widgets.append(start)
+        
     
+    state = tk.Label(window,
+                     text = "Conected",
+                     font =("Arial Black",12),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    widgets.append(state)
+    
+    back = tk.Button(window,
+                       text = "Back",
+                       font =("Arial Black",10),
+                       bd  = 0,
+                       fg = "white",
+                       bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(main_menu, widgets))
+    
+    back.place(x = 0,
+               y = wd_height - 25
+               )
+    
+    widgets.append(back)
+    
+    conected = True
+    
+    if conected:
+        state.grid(row = 1,
+                  column = 0)    
 
 #_____Place ships_____________________________________________________________#
 def place_wd(widgets):
@@ -350,7 +414,21 @@ def place_wd(widgets):
                 height = 75)
     
     widgets.append(done)
-
+    
+    back = tk.Button(window,
+                       text = "Back",
+                       font =("Arial Black",10),
+                       bd  = 0,
+                       fg = "white",
+                       bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(main_menu, widgets))
+    
+    back.place(x = 0,
+               y = wd_height - 25
+               )
+    
+    widgets.append(back)
 
 #_____Place ships_____________________________________________________________#
 def game_wd(widgets):
@@ -383,7 +461,7 @@ def game_wd(widgets):
             elif my_grid[x][y] == 2:
                 my_pole[x][y].configure(bg = killed_red,state = "disabled",)
             elif my_grid[x][y] == 3:
-                my_pole[x][y].configure(bg = killed_red,state = "disabled")
+                my_pole[x][y].configure(bg = u_missed,state = "disabled")
             
 
 
