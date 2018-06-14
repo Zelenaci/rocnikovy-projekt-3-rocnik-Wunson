@@ -8,6 +8,7 @@ Created on Tue Jun 12 16:56:14 2018
 import socket
 from threading import Thread
 
+ip_adr = ""
 MAX_BUFFER_SIZE = 4096
 ship_counter = 0
 pole = []
@@ -84,7 +85,7 @@ def start_server(local_IP):
 
 
 #_____Client______________________________________________________________________________________#
-def client(server_ip = "10.0.0.35", data = []):    
+def client(server_ip = "192.168.1.144", data = []):    
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
     try:
         soc.connect((server_ip, 666))
@@ -107,6 +108,8 @@ menubuton_activebg = "#94A7B1"
 menubuton_bg = "#BED5E1"
 sea_blue = "#3496C5"
 act_sea_blue = "#2380AC"
+
+
 
 # Window
 window = tk.Tk()
@@ -164,59 +167,169 @@ def button_grid(function):
         pole.append(row)
 
 #_____Main menu_______________________________________________________________#
-def main_menu():
+def main_menu(widgets = []):
     window.configure(background = bg_blue)
     
-    buttons = []
+    widgets = []
     labels = ["Host", "Join"]
     commands = [host_wd, join_wd]
     
-    for i in range(0, 2):
-        buttons.append(tk.Button(window,
-                     text = labels[i],
-                     font =("Arial",30),
-                     bd = 0,
-                     bg = menubuton_bg,
-                     activebackground = menubuton_activebg,
-                     command = partial(commands[i], buttons)))    
+    title = tk.Label(window,
+                     text = "MÍSTO DRŽEČ",
+                     font =("Arial Black",50),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
     
-        buttons[i].place(x = (wd_width/2)-50,
-               y = (i+1)*wd_height/4,
-               width = 100,
-               height = 50)
+    title.pack()
+    
+    
+    for i in range(0, 2):
+        widgets.append(tk.Button(window,
+                     text = labels[i],
+                     font =("Arial Black",30),
+                     bd = 0,
+                     fg = "white",
+                     bg = sea_blue,
+                     activebackground = act_sea_blue,
+                     command = partial(commands[i], widgets)))    
+    
+        widgets[i].place(x = (wd_width/2)-75,
+               y = ((i+1)*wd_height/4) + 75,
+               width = 150,
+               height = 75)
+        
+    widgets.append(title)
 
-
-#_____Place ships_____________________________________________________________#
-def del_buttons(buttons):
-    for i in buttons:
+#_____Killer__________________________________________________________________#
+def killer(widgets):
+    for i in widgets:
         i.destroy()
+        
+def ip_get(entry):
+    global ip_adr
+    ip_adr = entry.get()
+    print(ip_adr)
+    
 
 #_____Place ships_____________________________________________________________#
-def place_wd():
+def place_wd(widgets):
+    killer(widgets)
     button_grid(place_ships)
 
 #_____Host window_____________________________________________________________#
-def host_wd(buttons):
+def host_wd(widgets):
+    killer(widgets)
+    
     local_IP = get_local_IP()
     Thread(target=start_server, args=(local_IP,)).start()
     
-    title = tk.Label(window, text = local_IP, font = ("times",36))
-    title.place(x = 0, y = 0)
-    del_buttons(buttons)
+    window.configure(background = bg_blue)
+    
+    widgets = []
+    
+    label = tk.Label(window,
+                     text = "your ip is:",
+                     font =("Arial Black",20),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    label.grid(row = 0,
+               column = 0)
+    
+    widgets.append(label)
+    
+    ip_label = tk.Label(window,
+                     text = local_IP,
+                     font =("Arial Black",20),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    ip_label.grid(row = 0,
+                  column = 1)
+    
+    widgets.append(ip_label)
+    
+    start = tk.Button(window,
+                       text = "Start",
+                       font =("Arial Black",30),
+                       bd = 0,
+                       fg = "white",
+                       bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(place_wd, widgets))
+    
+    start.place(x = (wd_width/2)-75,
+                y = (wd_height/3),
+                width = 150,
+                height = 75)
+    
+    widgets.append(start)
+    
 
 #_____Join window_____________________________________________________________#
-def join_wd(buttons):
+def join_wd(widgets):
     global ip_adr
+    killer(widgets)
+    
+    ip_label = tk.Label(window,
+                     text = "connect to:",
+                     font =("Arial Black",10),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    ip_label.grid(row = 0,
+                  column = 0)
+    
+    widgets.append(ip_label)
+    
+    
     
     ip = tk.Entry(window)
-    ip.place(x = 0, y = 0)
-    ip_adr = ip.get()
-    del_buttons(buttons)
     
-    place_wd()
+    ip.grid(row = 0, column = 1,)
+    
+    widgets.append(ip)
+    
+    confirm = tk.Button(window,
+                       text = "confirm",
+                       font = ("Arial Black", 10),
+                       bd = 0,
+                       fg = "white",
+                       bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(ip_get,ip)
+                       )
+    
+    confirm.grid(row = 0, 
+                 column = 2,)
+    
+    widgets.append(confirm)
+    
+    
+    
+    connect = tk.Button(window,
+                      text = "Connect",
+                      font =("Arial Black",30),
+                      bd = 0,
+                      fg = "white",
+                      bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(place_wd, widgets))
+    
+    connect.place(x = (wd_width/2)-100,
+                y = (wd_height/3),
+                width = 200,
+                height = 75)
+    
+    widgets.append(connect)
+    
     
 
-#_____Main________________________________________________________________________________________#
+#_____Main____________________________________________________________________#
 
 main_menu()
 window.mainloop()
