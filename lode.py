@@ -8,7 +8,7 @@ Created on Tue Jun 12 16:56:14 2018
 import socket
 from threading import Thread
 
-mode = "UNDEF"
+server_EN = False
 
 ip_adr = ""
 MAX_BUFFER_SIZE = 4096
@@ -19,38 +19,38 @@ ship_counter = 0
 my_pole = []
 enemy_pole = []
 
-my_grid =          [[0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0]]
+my_grid =           [[0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0]]
                    
-enemy_grid =       [[0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0]]
+enemy_grid =        [[0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0]]
 
 enemy_grid_hidden = [[0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0]]
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0]]
 
 #_____Communication_______________________________________________________________________________#
 def rx(soc):  
@@ -103,6 +103,9 @@ def get_local_IP():
                 socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
 
 def start_server(local_IP):
+    global server_EN
+    server_EN = True
+    
     print('Vase IP: ' + local_IP)
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -118,7 +121,7 @@ def start_server(local_IP):
     
     send_buffer = []
     
-    while True:
+    while server_EN:
         conn, addr = soc.accept()
         ip, port = str(addr[0]), str(addr[1])
         try:
@@ -191,8 +194,11 @@ def place_ships(x,y):
 def destroy_ships(target,x,y):
     pass
 
+def restore_conection():
+    pass
+
 #_____generate buton grid with function in them_______________________________#
-def button_grid(function,tile_x = 0,tile_y = 0, pole = my_pole):   
+def button_grid(function,tile_x = 0,tile_y = 0, pole = my_pole):
     for x in range(0,10):
         row = []
         for y in range(0,10):
@@ -242,6 +248,9 @@ def grid_refresh(pole,grid,state = "disabled"):
     
 #_____Main menu_______________________________________________________________#
 def main_menu(widgets = []):
+    global server_EN
+        
+    server_EN = False
     
     try:
         for row in my_pole:
@@ -259,7 +268,6 @@ def main_menu(widgets = []):
     commands = [host_wd, join_wd]
     
     title = tk.Label(window,
-                     text = "MÍSTO DRŽEČ",
                      text = "LODĚ",
                      font =("Arial Black",50),
                      bg = bg_blue,
@@ -442,7 +450,7 @@ def join_wd(widgets):
     
     
     state = tk.Label(window,
-                     text = vášův_úžasný_text,
+                     text = "vášův_úžasný_text",
                      font =("Arial Black",12),
                      bg = bg_blue,
                      fg = "white"
@@ -523,16 +531,16 @@ def all_ships(widgets):
         game_wd(widgets)
     else:
         not_enough =  tk.Label(window,
-                     text = "Not enough ships",
-                     font =("Arial Black",10),
+                     text = "Not enough ships ♥",
+                     font =("Arial Black",16),
                      bg = bg_blue,
-                     fg = "white"
+                     fg = "red"
                      )
     
-    not_enough.place(x = 550,
-                     y = wd_height + 80)
+        not_enough.place(x = 550,
+                         y = ((wd_height/3) + 80))
 
-    widgets.append(not_enough)
+        widgets.append(not_enough)
 
 #_____Place ships_____________________________________________________________#
 def game_wd(widgets):
