@@ -47,9 +47,7 @@ def tx(soc, data):
 #_____Server______________________________________________________________________________________#
 def client_thread(conn, ip, port):
         my_array = rx(conn)
-        tx(conn, ["Success", 1, 2, "nejaka data", "funguje to!"])
-        print(my_array)
-        print('Connection ' + ip + ':' + port + " ended")
+        tx(conn, [my_array, 'Connection ' + ip + ':' + port + " ended"])
         conn.close()
 
 def get_local_IP():
@@ -72,6 +70,8 @@ def start_server(local_IP):
     
     soc.listen(10)
     
+    send_buffer = []
+    
     while True:
         conn, addr = soc.accept()
         ip, port = str(addr[0]), str(addr[1])
@@ -85,13 +85,14 @@ def start_server(local_IP):
 
 
 #_____Client______________________________________________________________________________________#
-def client(server_ip = "192.168.1.144", data = []):    
-    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+def client(server_ip, data = []):    
+    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    soc.settimeout(1000)
     try:
         soc.connect((server_ip, 666))
     except:
         return("Error, connection failed!")
-    
+    soc.settimeout(None)
     tx(soc, data)
     response = rx(soc)
     return(response)
@@ -133,7 +134,7 @@ def place_ships(x,y):
         ship_counter += 1
         
         #####_Test_###############
-        response = client(data=["shot", x, y])
+        response = client(server_ip=ip_adr, data=["shot", x, y])
         print(response)
         ##########################
     
@@ -209,7 +210,9 @@ def killer(widgets):
 def ip_get(entry):
     global ip_adr
     ip_adr = entry.get()
-    print(ip_adr)
+    response = client(ip_adr)
+    
+    print(response)
     
 
 #_____Place ships_____________________________________________________________#
@@ -229,7 +232,7 @@ def host_wd(widgets):
     widgets = []
     
     label = tk.Label(window,
-                     text = "your ip is:",
+                     text = "Your IP is:",
                      font =("Arial Black",20),
                      bg = bg_blue,
                      fg = "white"
@@ -275,7 +278,7 @@ def join_wd(widgets):
     killer(widgets)
     
     ip_label = tk.Label(window,
-                     text = "connect to:",
+                     text = "Connect to:",
                      font =("Arial Black",10),
                      bg = bg_blue,
                      fg = "white"
@@ -295,7 +298,7 @@ def join_wd(widgets):
     widgets.append(ip)
     
     confirm = tk.Button(window,
-                       text = "confirm",
+                       text = "Connect",
                        font = ("Arial Black", 10),
                        bd = 0,
                        fg = "white",
@@ -312,7 +315,7 @@ def join_wd(widgets):
     
     
     connect = tk.Button(window,
-                      text = "Connect",
+                      text = "Start",
                       font =("Arial Black",30),
                       bd = 0,
                       fg = "white",
