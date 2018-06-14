@@ -10,6 +10,7 @@ from threading import Thread
 
 ip_adr = ""
 MAX_BUFFER_SIZE = 4096
+PORT = 1025
 ship_counter = 0
 pole = []
 game_grid =        [[0,0,0,0,0,0,0,0,0,0],
@@ -62,7 +63,7 @@ def start_server(local_IP):
     soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     try:
-        soc.bind((local_IP, 666))
+        soc.bind((local_IP, PORT))
     except socket.error as msg:
         import sys
         print('Bind failed. Error : ' + str(sys.exc_info()))
@@ -89,7 +90,7 @@ def client(server_ip, data = []):
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.settimeout(1000)
     try:
-        soc.connect((server_ip, 666))
+        soc.connect((server_ip, PORT))
     except:
         return("Error, connection failed!")
     soc.settimeout(None)
