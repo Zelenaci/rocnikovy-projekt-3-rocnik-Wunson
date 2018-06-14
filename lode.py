@@ -324,7 +324,7 @@ def join_wd(widgets):
 #_____Place ships_____________________________________________________________#
 def place_wd(widgets):
     killer(widgets)
-    button_grid(place_ships,tile_y = 60,)
+    button_grid(place_ships,tile_y = 65,)
     
     title = tk.Label(window,
                      text = "Place your ships",
@@ -335,16 +335,33 @@ def place_wd(widgets):
     
     title.pack()
 
+    widgets.append(title)
+    
+    done = tk.Button(window,
+                      text = "Done",
+                      font =("Arial Black",30),
+                      bd  = 0,
+                      fg = "white",
+                      bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(game_wd, widgets))
+    
+    done.place (x = 550,
+                y = (wd_height/3),
+                width = 200,
+                height = 75)
+    
+    widgets.append(done)
 
 
 #_____Place ships_____________________________________________________________#
 def game_wd(widgets):
     killer(widgets)
-    button_grid(place_ships)
-    button_grid(place_ships,tile_x = 600,tile_y = 0, pole = enemy_pole)
+    
+    button_grid(place_ships,tile_x = 600,tile_y = 65, pole = enemy_pole)
+    
+    
         
-    
-    
     wd_width = 1150
     wd_height = 600
     wd_size =(str(wd_width),"x",str(wd_height))
