@@ -41,7 +41,7 @@ enemy_grid =        [[0,0,0,0,0,0,0,0,0,0],
                      [0,0,0,0,0,0,0,0,0,0],
                      [0,0,0,0,0,0,0,0,0,0]]
 
-enemy_grid_hidden = [[0,0,0,0,0,0,0,0,0,0],
+enemy_grid_hidden = [[1,1,1,1,1,1,1,1,1,1],
                      [0,0,0,0,0,0,0,0,0,0],
                      [0,0,0,0,0,0,0,0,0,0],
                      [0,0,0,0,0,0,0,0,0,0],
@@ -191,9 +191,24 @@ def place_ships(x,y):
         
 
 #_____Place'nt ships__________________________________________________________#
-def destroy_ships(target,x,y):
-    pass
-
+def destroy_ships(x,y,enemy = True):
+    global my_grid
+    global enemy_grid
+    global enemy_grid_hidden
+    
+    if enemy:
+        if enemy_grid_hidden[x][y] == 0:
+            enemy_grid[x][y] = 3
+        elif enemy_grid_hidden[x][y] == 1:
+            enemy_grid[x][y] = 2
+        grid_refresh(enemy_pole,enemy_grid,state = "normal")
+    else:
+        if my_grid[x][y] == 0:
+            my_grid[x][y] = 3
+        elif my_grid[x][y] == 1:
+            my_grid[x][y] = 2
+        grid_refresh(my_pole,my_grid,) #dissabled for normal game
+        
 def restore_conection():
     pass
 
@@ -566,7 +581,7 @@ def game_wd(widgets):
 
     widgets.append(title)
     
-    button_grid(place_ships,tile_x = 600,tile_y = 65, pole = enemy_pole)
+    button_grid(destroy_ships,tile_x = 600,tile_y = 65, pole = enemy_pole)
     
     grid_refresh(my_pole,my_grid)
 
