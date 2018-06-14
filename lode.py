@@ -111,8 +111,8 @@ menubuton_activebg = "#94A7B1"
 menubuton_bg = "#BED5E1"
 sea_blue = "#3496C5"
 act_sea_blue = "#2380AC"
-
-
+killed_red = "#8B1B1B"
+u_missed = "#47A9D7"
 
 # Window
 window = tk.Tk()
@@ -183,7 +183,7 @@ def main_menu(widgets = []):
     commands = [host_wd, join_wd]
     
     title = tk.Label(window,
-                     text = "MÍSTO DRŽEČ",
+                     text = "LODĚ",
                      font =("Arial Black",50),
                      bg = bg_blue,
                      fg = "white"
@@ -218,8 +218,6 @@ def host_wd(widgets):
     Thread(target=start_server, args=(local_IP,)).start()
     
     window.configure(background = bg_blue)
-    
-    widgets = []
     
     label = tk.Label(window,
                      text = "Your IP is:",
@@ -358,16 +356,35 @@ def place_wd(widgets):
 def game_wd(widgets):
     killer(widgets)
     
-    button_grid(place_ships,tile_x = 600,tile_y = 65, pole = enemy_pole)
-    
-    
-        
     wd_width = 1150
     wd_height = 600
     wd_size =(str(wd_width),"x",str(wd_height))
     window.geometry("".join(wd_size))
+    
+    title = tk.Label(window,
+                     text = "Your ships                         Enemy ships:",
+                     font =("Arial Black",30),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    title.pack()
 
-
+    widgets.append(title)
+    
+    button_grid(place_ships,tile_x = 600,tile_y = 65, pole = enemy_pole)
+    
+    for x in range(0,10):
+        for y in range(0,10):
+            if my_grid[x][y] == 0:
+                my_pole[x][y].configure(bg = sea_blue,state = "disabled")
+            elif my_grid[x][y] == 1:
+                my_pole[x][y].configure(bg = "black",state = "disabled")
+            elif my_grid[x][y] == 2:
+                my_pole[x][y].configure(bg = killed_red,state = "disabled",)
+            elif my_grid[x][y] == 3:
+                my_pole[x][y].configure(bg = killed_red,state = "disabled")
+            
 
 
 #_____Main____________________________________________________________________#
