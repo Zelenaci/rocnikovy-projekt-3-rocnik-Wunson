@@ -140,7 +140,11 @@ def place_ships(x,y):
         my_pole[x][y].configure(bg = sea_blue)
         ship_counter -= 1
 
-# generate buton grid with function in them
+#_____Place'nt ships______________________________________________________________#
+def destroy_ships(target,x,y):
+    pass
+
+#_____generate buton grid with function in them_______________________________#
 def button_grid(function,tile_x = 0,tile_y = 0, pole = my_pole):   
     for x in range(0,10):
         row = []
@@ -369,6 +373,22 @@ def join_wd(widgets):
     
     widgets.append(start)
         
+    restore = tk.Button(window,
+                      text = "Restore",
+                      font =("Arial Black",30),
+                      bd  = 0,
+                      fg = "white",
+                      bg = sea_blue,
+                       activebackground = act_sea_blue,
+                       command = partial(restore_conection, widgets))
+    
+    restore.place(x = (wd_width/2)-100,
+                y = ((2*wd_height)/3),
+                width = 200,
+                height = 75)
+    
+    widgets.append(restore)   
+    
     
     state = tk.Label(window,
                      text = vášův_úžasný_text,
@@ -422,7 +442,7 @@ def place_wd(widgets):
                       fg = "white",
                       bg = sea_blue,
                        activebackground = act_sea_blue,
-                       command = partial(game_wd, widgets))
+                       command =partial(all_ships, widgets))
     
     done.place (x = 550,
                 y = (wd_height/3),
@@ -445,6 +465,23 @@ def place_wd(widgets):
                )
     
     widgets.append(back)
+
+def all_ships(widgets):
+    global ship_counter
+    if ship_counter == 20:
+        game_wd(widgets)
+    else:
+        not_enough =  tk.Label(window,
+                     text = "Not enough ships",
+                     font =("Arial Black",10),
+                     bg = bg_blue,
+                     fg = "white"
+                     )
+    
+    not_enough.place(x = 550,
+                     y = wd_height + 80)
+
+    widgets.append(not_enough)
 
 #_____Place ships_____________________________________________________________#
 def game_wd(widgets):
