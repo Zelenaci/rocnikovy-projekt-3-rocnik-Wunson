@@ -8,13 +8,40 @@ Created on Tue Jun 12 16:56:14 2018
 import socket
 from threading import Thread
 
+mode = "UNDEF"
+
 ip_adr = ""
 MAX_BUFFER_SIZE = 4096
 PORT = 1025
+
 ship_counter = 0
+
 my_pole = []
 enemy_pole = []
+
 my_grid =          [[0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0]]
+                   
+enemy_grid =       [[0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0]]
+
+enemy_grid_hidden = [[0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
@@ -32,24 +59,41 @@ def rx(soc):
         rx_data_bytes = soc.recv(MAX_BUFFER_SIZE)
         rx_data = rx_data_bytes.decode("utf8").rstrip()
        
-        if "--END--" in rx_data:                # Konec prenosu
+        if "--END--" in rx_data:                                # End of transfer
             return data
         else:
             data.append(rx_data)
-            soc.sendall("-".encode("utf8"))     # Ready for another data
+            soc.sendall("-".encode("utf8"))                     # Ready for another data
 
-def tx(soc, data):
-    for x in data:
+def tx(soc, data_type = "X", data = []):
+    tx_data = [data_type]
+    tx_data.extend(data)
+    
+    for x in tx_data:
         msg = "{}\t".format(x)
         soc.sendall(msg.encode("utf8"))
-        if soc.recv(MAX_BUFFER_SIZE).decode("utf8") == "-":    # Wait for response
+        if soc.recv(MAX_BUFFER_SIZE).decode("utf8") == "-":     # Wait for response
             pass
     soc.send(b'--END--')
-
+    
+def process_data(conn, data = []):
+    try:
+        data_type = data.pop(0)
+    except:
+        tx(conn, "M", "Error")
+    
+    if data_type == "L":
+        global enemy_grid
+        enemy_grid = data
+        tx(conn, "C")
+        
+    else:
+        tx(conn, "X")
+        
 #_____Server______________________________________________________________________________________#
 def client_thread(conn, ip, port):
-        my_array = rx(conn)
-        tx(conn, [my_array, 'Connection ' + ip + ':' + port + " ended"])
+        received_data = rx(conn)
+        process_data(conn, received_data)
         conn.close()
 
 def get_local_IP():
@@ -87,15 +131,17 @@ def start_server(local_IP):
 
 
 #_____Client______________________________________________________________________________________#
-def client(server_ip, data = []):    
+def client(server_ip, data_type = "X", data = []):    
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
     soc.settimeout(1000)
     try:
         soc.connect((server_ip, PORT))
     except:
         return("Error, connection failed!")
     soc.settimeout(None)
-    tx(soc, data)
+    
+    tx(soc, data_type, data)
     response = rx(soc)
     return(response)
     
@@ -139,6 +185,7 @@ def place_ships(x,y):
         my_grid[x][y] = 0
         my_pole[x][y].configure(bg = sea_blue)
         ship_counter -= 1
+        
 
 # generate buton grid with function in them
 def button_grid(function,tile_x = 0,tile_y = 0, pole = my_pole):   
@@ -167,11 +214,11 @@ def killer(widgets):
     for i in widgets:
         i.destroy()
         
-def ip_get(entry):
+def ip_get(entry):              #Get IP from text field
     global ip_adr
     ip_adr = entry.get()
-    response = client(ip_adr)
     
+    response = client(ip_adr)   #Check connection
     print(response)
     
 #_____Main menu_______________________________________________________________#
@@ -183,12 +230,11 @@ def main_menu(widgets = []):
     commands = [host_wd, join_wd]
     
     title = tk.Label(window,
-                     text = "MÍSTO DRŽEČ",
+                     text = "HRA LODĚ   ",
                      font =("Arial Black",50),
                      bg = bg_blue,
                      fg = "white"
                      )
-    
     title.pack()
     
     
@@ -212,8 +258,11 @@ def main_menu(widgets = []):
 
 #_____Host window_____________________________________________________________#
 def host_wd(widgets):
+    global mode
+    
     killer(widgets)
     
+    mode = "SERVER"
     local_IP = get_local_IP()
     Thread(target=start_server, args=(local_IP,)).start()
     
@@ -265,8 +314,11 @@ def host_wd(widgets):
 #_____Join window_____________________________________________________________#
 def join_wd(widgets):
     global ip_adr
+    global mode
+    
     killer(widgets)
     
+    mode = "CLIENT"
     ip_label = tk.Label(window,
                      text = "Connect to:",
                      font =("Arial Black",10),
@@ -358,16 +410,16 @@ def place_wd(widgets):
 def game_wd(widgets):
     killer(widgets)
     
+    if mode == "CLIENT":
+        response = client(ip_adr, "L", my_grid) 
+        print(response)
+    
+    
     button_grid(place_ships,tile_x = 600,tile_y = 65, pole = enemy_pole)
-    
-    
-        
     wd_width = 1150
     wd_height = 600
     wd_size =(str(wd_width),"x",str(wd_height))
     window.geometry("".join(wd_size))
-
-
 
 
 #_____Main____________________________________________________________________#
