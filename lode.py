@@ -140,7 +140,7 @@ def place_ships(x,y):
         my_pole[x][y].configure(bg = sea_blue)
         ship_counter -= 1
 
-#_____Place'nt ships______________________________________________________________#
+#_____Place'nt ships__________________________________________________________#
 def destroy_ships(target,x,y):
     pass
 
