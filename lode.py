@@ -167,12 +167,29 @@ def killer(widgets):
     for i in widgets:
         i.destroy()
         
+
+#_____Get IP__________________________________________________________________#
 def ip_get(entry):
     global ip_adr
     ip_adr = entry.get()
     response = client(ip_adr)
     
     print(response)
+    
+
+#_____Refresh Grid____________________________________________________________#
+def grid_refresh(pole,grid,state = "disabled"):
+    for x in range(0,10):
+            for y in range(0,10):
+                if grid[x][y] == 0:
+                    pole[x][y].configure(bg = sea_blue,state = state)
+                elif grid[x][y] == 1:
+                    pole[x][y].configure(bg = "black",state = "disabled")
+                elif grid[x][y] == 2:
+                    pole[x][y].configure(bg = killed_red,state = "disabled")
+                elif grid[x][y] == 3:
+                    pole[x][y].configure(bg = u_missed,state = "disabled")
+    
     
 #_____Main menu_______________________________________________________________#
 def main_menu(widgets = []):
@@ -354,13 +371,16 @@ def join_wd(widgets):
         
     
     state = tk.Label(window,
-                     text = "Conected",
+                     text = vášův_úžasný_text,
                      font =("Arial Black",12),
                      bg = bg_blue,
                      fg = "white"
                      )
     
     widgets.append(state)
+    
+    state.grid(row = 1,
+               column = 0)
     
     back = tk.Button(window,
                        text = "Back",
@@ -377,11 +397,7 @@ def join_wd(widgets):
     
     widgets.append(back)
     
-    conected = True
-    
-    if conected:
-        state.grid(row = 1,
-                  column = 0)    
+        
 
 #_____Place ships_____________________________________________________________#
 def place_wd(widgets):
@@ -452,18 +468,7 @@ def game_wd(widgets):
     
     button_grid(place_ships,tile_x = 600,tile_y = 65, pole = enemy_pole)
     
-    for x in range(0,10):
-        for y in range(0,10):
-            if my_grid[x][y] == 0:
-                my_pole[x][y].configure(bg = sea_blue,state = "disabled")
-            elif my_grid[x][y] == 1:
-                my_pole[x][y].configure(bg = "black",state = "disabled")
-            elif my_grid[x][y] == 2:
-                my_pole[x][y].configure(bg = killed_red,state = "disabled",)
-            elif my_grid[x][y] == 3:
-                my_pole[x][y].configure(bg = u_missed,state = "disabled")
-            
-
+    grid_refresh(my_pole,my_grid)
 
 #_____Main____________________________________________________________________#
 
