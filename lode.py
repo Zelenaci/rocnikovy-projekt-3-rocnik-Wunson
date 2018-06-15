@@ -235,18 +235,6 @@ def place_ships(x,y):                   # Generate user ship layout
         my_grid[x][y] = 0
         my_pole[x][y].configure(bg = sea_blue)
         ship_counter -= 1
-        
-def restore_ships():                    # Download ship layout from server
-    global my_grid
-    my_grid = client(ip_adr)
-    
-    colors = [sea_blue, "black", killed_red, u_missed]
-    states = ["enabled", "disabled", "disabled", "disabled"]    
-    
-    for x in range(0,10):
-        for y in range(0,10):
-            h = my_pole[x][y]
-            h.configure(bg = colors[h], state = states)
     
 def destroy_ships(x, y, enemy = True):  # Placen't ships 
     global enemy_grid
@@ -494,7 +482,7 @@ def join_wd(widgets):
                 height = 75)
     
     widgets.append(start)
-        
+    """    
     restore = tk.Button(window,
                       text = "Restore",
                       font =("Arial Black",30),
@@ -502,7 +490,7 @@ def join_wd(widgets):
                       fg = "white",
                       bg = sea_blue,
                        activebackground = act_sea_blue,
-                       command = partial(restore_ships, widgets))
+                       command = partial(widgets))
     
     restore.place(x = (wd_width/2)-100,
                 y = ((2*wd_height)/3),
@@ -510,7 +498,7 @@ def join_wd(widgets):
                 height = 75)
     
     widgets.append(restore)   
-    
+    """
     
     state = tk.Label(window,
                      text = "vášův_úžasný_text",
