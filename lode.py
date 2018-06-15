@@ -6,12 +6,13 @@ Created on Tue Jun 12 16:56:14 2018
 """
 
 import socket
-from threading import Thread
+from threading import Thread, Timer
 
 server_EN = False
 your_turn = True
 shot_buffer = []
 
+# Data types
 SHIP_LAYOUT = "L"
 SHIP_LAYOUT_REQUEST = "R"
 
@@ -20,6 +21,7 @@ SHOT_REQUEST = "K"
 
 MESSAGE = "M"
 NOTHING = "X"
+
 
 ip_adr = ""
 MAX_BUFFER_SIZE = 4096
@@ -115,13 +117,20 @@ def process_data(conn, data = []):
         tx(conn, SHIP_LAYOUT, my_grid)
         
     elif data_type == SHOT:
-        destroy_ships(data[0], data[1], False)
+        try:
+            destroy_ships(data[0], data[1], False)
+        except:
+            print("Except")
+        
         if server_EN:
             tx(conn, MESSAGE)
             
     elif data_type == SHOT_REQUEST:
-        tx(conn, SHOT, shot_buffer)
-        shot_buffer = []
+        if shot_buffer == []:
+            tx(conn, MESSAGE)
+        else: 
+            tx(conn, SHOT, shot_buffer)
+            shot_buffer = []
         
         
 #_____Server______________________________________________________________________________________#
@@ -139,7 +148,6 @@ def get_local_IP():
 def start_server(local_IP):
     global server_EN
     server_EN = True
-    
     #print('Vase IP: ' + local_IP)
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -152,8 +160,6 @@ def start_server(local_IP):
         sys.exit()
     
     soc.listen(10)
-    
-    #send_buffer = []
     
     while server_EN:
         conn, addr = soc.accept()
@@ -183,6 +189,11 @@ def client(server_ip, data_type = NOTHING, data = []):
     process_data(soc, response)
     
     return(response)
+    
+def client_timer():
+    #if not your_turn:
+    client(ip_adr, SHOT_REQUEST)
+    Timer(0.4, client_timer).start()
     
     
 #===GUI===========================================================================================#    
@@ -243,7 +254,7 @@ def destroy_ships(x, y, enemy = True):  # Placen't ships
     global shot_buffer
     colors = [u_missed, killed_red]
     
-    if your_turn:
+    if your_turn and shot_buffer == []:
         if enemy:
             visible_grid = enemy_grid
             hidden_grid = enemy_grid_hidden
@@ -348,9 +359,9 @@ def main_menu(widgets = []):
 def host_wd(widgets):
     global mode
     
+    mode = "SERVER"
     killer(widgets)
     
-    mode = "SERVER"
     local_IP = get_local_IP()
     Thread(target=start_server, args=(local_IP,)).start()
     
@@ -416,9 +427,11 @@ def join_wd(widgets):
     global ip_adr
     global mode
     
+    mode = "CLIENT"
     killer(widgets)
     
-    mode = "CLIENT"
+    
+    
     ip_label = tk.Label(window,
                      text = "Connect to:",
                      font =("Arial Black",10),
@@ -549,7 +562,7 @@ def place_wd(widgets):
                       fg = "white",
                       bg = sea_blue,
                        activebackground = act_sea_blue,
-                       command =partial(all_ships, widgets))
+                       command = partial(all_ships, widgets))
     
     done.place (x = 550,
                 y = (wd_height/3),
@@ -575,6 +588,7 @@ def place_wd(widgets):
 
 def all_ships(widgets):
     global ship_counter
+    
     if ship_counter == 20:
         game_wd(widgets)
     else:
@@ -597,6 +611,7 @@ def game_wd(widgets):
     if mode == "CLIENT":
         client(ip_adr, SHIP_LAYOUT, my_grid)
         client(ip_adr, SHIP_LAYOUT_REQUEST)
+        client_timer()
     
     wd_width = 1150
     wd_height = 600
