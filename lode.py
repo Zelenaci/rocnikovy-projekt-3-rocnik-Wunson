@@ -10,7 +10,7 @@ from threading import Thread, Timer
 
 server_EN = False
 your_turn = False
-ready = False
+ready_status = 0
 
 shot_buffer = []
 connection_status = "Disconnected"
@@ -18,10 +18,9 @@ connection_status = "Disconnected"
 # Data types
 SHIP_LAYOUT = "L"
 SHIP_LAYOUT_REQUEST = "R"
-
 SHOT = "S"
 SHOT_REQUEST = "K"
-
+START_REQUEST = "T"
 MESSAGE = "M"
 NOTHING = "X"
 
@@ -29,6 +28,8 @@ NOTHING = "X"
 ip_adr = ""
 MAX_BUFFER_SIZE = 4096
 PORT = 1025
+
+ship_number = 20
 
 my_pole = []        # List for storing buttons
 enemy_pole = []     # List for storing buttons
@@ -136,6 +137,9 @@ def process_data(conn, data = []):
             tx(conn, SHOT, shot_buffer)
             shot_buffer = []
             
+    elif data_type == START_REQUEST:
+        tx(conn, MESSAGE, [ready_status])
+            
     elif data_type == MESSAGE:
         return data
     
@@ -234,7 +238,7 @@ window.geometry("".join(wd_size))
 def place_ships(x,y):                   # Generate user ship layout
     global ship_counter
     global my_grid
-    if my_grid[x][y] == 0 and ship_counter < 20:
+    if my_grid[x][y] == 0 and ship_counter < ship_number:
         my_grid[x][y] = 1
         my_pole[x][y].configure(bg = "black")
         ship_counter += 1
@@ -332,7 +336,12 @@ def ip_get(entry, status_field):    #Get IP from text field
 #_____Main menu_______________________________________________________________#
 def main_menu(widgets = []):
     global server_EN
+    global your_turn
+    global ready
+    
     server_EN = False
+    your_turn = False
+    ready = 0
     
     try:
         for row in my_pole:
@@ -456,7 +465,6 @@ def join_wd(widgets):
     your_turn = True
     killer(widgets)
     
-    # Must be declared at first!
     state = tk.Label(window, text = connection_status, font =("Arial Black",12),
                  bg = bg_blue, fg = "white")
     state.place(x = 0, y = 30)
@@ -482,7 +490,7 @@ def join_wd(widgets):
                        fg = "white",
                        bg = sea_blue,
                        activebackground = act_sea_blue,
-                       command = partial(ip_get,ip, widgets[3])
+                       command = partial(ip_get,ip, widgets[widgets.index(state)])
                        )
     confirm.grid(row = 0, column = 2,)
     widgets.append(confirm)
@@ -535,10 +543,17 @@ def place_wd(widgets):
                      bg = bg_blue,
                      fg = "white"
                      )
-    
     title.pack()
-
     widgets.append(title)
+    
+    game_status =  tk.Label(window,
+                     text = "",
+                     font =("Arial Black",16),
+                     bg = bg_blue,
+                     fg = "red"
+                     )
+    game_status.place(x = 550, y = ((wd_height/3) + 80))
+    widgets.append(game_status)
     
     done = tk.Button(window,
                       text = "Done",
@@ -547,42 +562,39 @@ def place_wd(widgets):
                       fg = "white",
                       bg = sea_blue,
                        activebackground = act_sea_blue,
-                       command = partial(all_ships, widgets))
-    
+                       command = partial(game_start, widgets, widgets[widgets.index(game_status)]))
     done.place (x = 550,
                 y = (wd_height/3),
                 width = 200,
                 height = 75)
-    
     widgets.append(done)
 
-def all_ships(widgets):
-    global ship_counter
-    
-    if ship_counter == 20:
-        game_wd(widgets)
-    else:
-        not_enough =  tk.Label(window,
-                     text = "Not enough ships ♥",
-                     font =("Arial Black",16),
-                     bg = bg_blue,
-                     fg = "red"
-                     )
-    
-        not_enough.place(x = 550,
-                         y = ((wd_height/3) + 80))
 
-        widgets.append(not_enough)
+def game_start(widgets, game_status):
+    global ready_status
+    
+    if ship_counter < ship_number:
+        game_status.configure(text = "Not enough ships ♥")
+        return
+        
+    if mode == "CLIENT":
+        response = client(ip_adr, START_REQUEST)        # Wait for server
+        if response == [0]:
+            game_status.configure(text = "Server is not ready")
+            return
+        
+        client(ip_adr, SHIP_LAYOUT, my_grid)
+        client(ip_adr, SHIP_LAYOUT_REQUEST)
+        client_timer()
+        
+    ready_status = 1
+    game_wd(widgets)
+        
 
 #_____Game Window_____________________________________________________________#
 def game_wd(widgets):
     killer(widgets)
     button_grid_EN(my_pole, "disabled")
-    
-    if mode == "CLIENT":
-        client(ip_adr, SHIP_LAYOUT, my_grid)
-        client(ip_adr, SHIP_LAYOUT_REQUEST)
-        client_timer()
     
     wd_width = 1150
     wd_height = 600
