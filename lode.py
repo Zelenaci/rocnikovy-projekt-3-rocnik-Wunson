@@ -523,6 +523,9 @@ def join_wd(widgets):
     
 #_____Place ships_____________________________________________________________#
 def place_wd(widgets):
+    if mode == "CLIENT" and not(connection_status == "Connected"):
+        return
+    
     killer(widgets)
     button_grid(place_ships,tile_y = 65,)
     
