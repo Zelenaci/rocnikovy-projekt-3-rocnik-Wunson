@@ -8,28 +8,32 @@ Created on Tue Jun 12 16:56:14 2018
 import socket
 from threading import Thread, Timer
 
+# Control
 server_EN = False
 your_turn = False
-ready = False
-
-shot_buffer = []
-connection_status = "Disconnected"
+ready_status = 0
 
 # Data types
 SHIP_LAYOUT = "L"
 SHIP_LAYOUT_REQUEST = "R"
-
 SHOT = "S"
 SHOT_REQUEST = "K"
-
+START_REQUEST = "T"
+DIED = "D"
 MESSAGE = "M"
 NOTHING = "X"
 
-
+# LAN properies
 ip_adr = ""
 MAX_BUFFER_SIZE = 4096
 PORT = 1025
 
+# LAN processing
+shot_buffer = []
+connection_status = "Disconnected"
+
+# Game data
+ship_number = 20    # Maximum ship number
 my_pole = []        # List for storing buttons
 enemy_pole = []     # List for storing buttons
 
@@ -67,9 +71,17 @@ enemy_grid_hidden = [[0,0,0,0,0,0,0,0,0,0],
                      [0,0,0,0,0,0,0,0,0,0],
                      [0,0,0,0,0,0,0,0,0,0]]
 
-ship_counter = 0
+enemy_ship_counter = ship_number
+ship_counter = 0    # Number of placed ships
+ship_counter_colors = ["#FF0000", "#FF0000", "#FC1D03", "#F93906", "#F75409", 
+                       "#F46E0C", "#F1860F", "#EF9D12", "#ECB315", "#E7DC1A", 
+                       "#E7DC1A", "#DAE41D", "#C3E21F", "#ADDF22", "#99DC24", 
+                       "#85DA27", "#72D729", "#61D42B", "#50D22D", "#40CF2F", 
+                       "#32CD32"]
+your_turn_text =      ["Enemy turn", "Your turn!"]
+your_turn_colors =    ["red", "lime"]
 
-#=====Communication===============================================================================#
+#-----C O M M U N I C A T I O N-------------------------------------------------------------------#
 def rx(soc):  
     import ast
     data = []
@@ -105,7 +117,6 @@ def process_data(conn, data = []):
     try:
         data_type = data.pop(0)
     except:
-        #tx(conn, MESSAGE, "Error")
         pass
     
     # Process data based od data_type
@@ -136,6 +147,9 @@ def process_data(conn, data = []):
             tx(conn, SHOT, shot_buffer)
             shot_buffer = []
             
+    elif data_type == START_REQUEST:
+        tx(conn, MESSAGE, [ready_status])
+            
     elif data_type == MESSAGE:
         return data
     
@@ -157,7 +171,6 @@ def get_local_IP():
 def start_server(local_IP):
     global server_EN
     server_EN = True
-    #print('Vase IP: ' + local_IP)
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
@@ -165,7 +178,6 @@ def start_server(local_IP):
         soc.bind((local_IP, PORT))
     except socket.error as msg:
         import sys
-        #print('Bind failed. Error : ' + str(sys.exc_info()))
         sys.exit()
     
     soc.listen(10)
@@ -176,7 +188,6 @@ def start_server(local_IP):
         try:
             Thread(target=client_thread, args=(conn, ip, port)).start()
         except:
-            #print("Error!")
             import traceback
             traceback.print_exc()
     soc.close()
@@ -204,7 +215,7 @@ def client_timer():
     Timer(0.5, client_timer).start()
     
     
-#===GUI===========================================================================================#    
+#---G U I-----------------------------------------------------------------------------------------#    
 import tkinter as tk
 from functools import partial
 
@@ -226,7 +237,7 @@ window.title("Lode")
 
 # Window Size
 wd_width = 800
-wd_height = 600
+wd_height = 640
 wd_size =(str(wd_width),"x",str(wd_height))
 window.geometry("".join(wd_size))
 #_____________________________________________________________________________#
@@ -234,7 +245,7 @@ window.geometry("".join(wd_size))
 def place_ships(x,y):                   # Generate user ship layout
     global ship_counter
     global my_grid
-    if my_grid[x][y] == 0 and ship_counter < 20:
+    if my_grid[x][y] == 0 and ship_counter < ship_number:
         my_grid[x][y] = 1
         my_pole[x][y].configure(bg = "black")
         ship_counter += 1
@@ -243,16 +254,19 @@ def place_ships(x,y):                   # Generate user ship layout
         my_grid[x][y] = 0
         my_pole[x][y].configure(bg = sea_blue)
         ship_counter -= 1
+        
+    your_ships_update("Your ships: " + str(ship_counter))
     
 def destroy_ships(x, y, enemy = True):  # Placen't ships 
     global enemy_grid
     global my_grid
     global ship_counter
+    global enemy_ship_counter
     global shot_buffer
     global your_turn
     colors = [u_missed, killed_red]
     
-    if shot_buffer == []:                               # Only if ship buffer is empty
+    if shot_buffer == []:               # Only if shot buffer is empty
         if enemy and your_turn:
             visible_grid = enemy_grid
             hidden_grid = enemy_grid_hidden
@@ -270,13 +284,20 @@ def destroy_ships(x, y, enemy = True):  # Placen't ships
         if (enemy and your_turn) or not enemy:
             h = hidden_grid[x][y]                       # handler
             
+            your_turn = not (enemy ^ h)                 # XNOR function, calculate if you on turn
+            your_turn_update(your_turn_text[your_turn]) # Update label on screen
+            
             if h and (not enemy) and (ship_counter > 0):
                 ship_counter -= 1
-                print("Ships remaining:" + str(ship_counter))
+                your_ships_update("Your ships: " + str(ship_counter))
                 if ship_counter == 0:
-                    print("You Lose")
+                    your_ships_update("You died!")
+                    
+            elif h and enemy and (enemy_ship_counter > 0):
+                enemy_ship_counter -= 1
+                if enemy_ship_counter == 0:
+                    your_turn_update("You win!")
             
-            your_turn = not (enemy ^ h)                 # XNOR function, calculate if you on turn
             pole[x][y].configure(bg = colors[h], state = "disabled")    # Update button state
             visible_grid[x][y] = h + 2                  # Update ship table (grid)
         
@@ -304,6 +325,12 @@ def button_grid(function,tile_x = 0,tile_y = 0, pole = my_pole):
         pole.append(row)
 
 #_____________________________________________________________________________#
+def your_ships_update(txt):
+    your_ships.configure(text = txt, fg = ship_counter_colors[ship_counter])
+
+def your_turn_update(txt):
+    your_turn_label.configure(text = txt, fg=your_turn_colors[your_turn])
+
 def button_grid_EN(pole, state = "disabled"):
     for x in pole:
         for y in x:
@@ -332,14 +359,12 @@ def ip_get(entry, status_field):    #Get IP from text field
 #_____Main menu_______________________________________________________________#
 def main_menu(widgets = []):
     global server_EN
-    server_EN = False
+    global your_turn
+    global ready
     
-    try:
-        for row in my_pole:
-            for i in row:
-                i.destroy()
-    except:
-        pass
+    server_EN = False
+    your_turn = False
+    ready = 0
     
     killer(widgets)
     
@@ -373,7 +398,6 @@ def main_menu(widgets = []):
                y = ((i+1)*wd_height/4) + 75,
                width = 150,
                height = 75)
-        
     widgets.append(title)
 
 
@@ -397,10 +421,7 @@ def host_wd(widgets):
                      bg = bg_blue,
                      fg = "white"
                      )
-    
-    label.grid(row = 0,
-               column = 0)
-    
+    label.grid(row = 0, column = 0)
     widgets.append(label)
     
     ip_label = tk.Label(window,
@@ -409,10 +430,7 @@ def host_wd(widgets):
                      bg = bg_blue,
                      fg = "white"
                      )
-    
-    ip_label.grid(row = 0,
-                  column = 1)
-    
+    ip_label.grid(row = 0, column = 1)
     widgets.append(ip_label)
     
     start = tk.Button(window,
@@ -422,13 +440,9 @@ def host_wd(widgets):
                        fg = "white",
                        bg = sea_blue,
                        activebackground = act_sea_blue,
-                       command = partial(place_wd, widgets))
-    
-    start.place(x = (wd_width/2)-75,
-                y = (wd_height/3),
-                width = 150,
-                height = 75)
-    
+                       command = partial(place_wd, widgets)
+                       )
+    start.place(x = (wd_width/2)-75, y = (wd_height/3), width = 150, height = 75)
     widgets.append(start)
     
     back = tk.Button(window,
@@ -438,12 +452,9 @@ def host_wd(widgets):
                        fg = "white",
                        bg = sea_blue,
                        activebackground = act_sea_blue,
-                       command = partial(main_menu, widgets))
-    
-    back.place(x = 0,
-               y = wd_height - 25
-               )
-    
+                       command = partial(main_menu, widgets)
+                       )
+    back.place(x = 0, y = wd_height - 25)
     widgets.append(back)
 
 #_____Join window_____________________________________________________________#
@@ -456,7 +467,6 @@ def join_wd(widgets):
     your_turn = True
     killer(widgets)
     
-    # Must be declared at first!
     state = tk.Label(window, text = connection_status, font =("Arial Black",12),
                  bg = bg_blue, fg = "white")
     state.place(x = 0, y = 30)
@@ -482,7 +492,7 @@ def join_wd(widgets):
                        fg = "white",
                        bg = sea_blue,
                        activebackground = act_sea_blue,
-                       command = partial(ip_get,ip, widgets[3])
+                       command = partial(ip_get,ip, widgets[widgets.index(state)])
                        )
     confirm.grid(row = 0, column = 2,)
     widgets.append(confirm)
@@ -523,6 +533,8 @@ def join_wd(widgets):
     
 #_____Place ships_____________________________________________________________#
 def place_wd(widgets):
+    global your_ships
+    
     if mode == "CLIENT" and not(connection_status == "Connected"):
         return
     
@@ -535,10 +547,17 @@ def place_wd(widgets):
                      bg = bg_blue,
                      fg = "white"
                      )
-    
     title.pack()
-
     widgets.append(title)
+    
+    game_status =  tk.Label(window,
+                     text = "",
+                     font =("Arial Black",16),
+                     bg = bg_blue,
+                     fg = "red"
+                     )
+    game_status.place(x = 550, y = ((wd_height/3) + 80))
+    widgets.append(game_status)
     
     done = tk.Button(window,
                       text = "Done",
@@ -547,45 +566,47 @@ def place_wd(widgets):
                       fg = "white",
                       bg = sea_blue,
                        activebackground = act_sea_blue,
-                       command = partial(all_ships, widgets))
-    
-    done.place (x = 550,
-                y = (wd_height/3),
-                width = 200,
-                height = 75)
-    
+                       command = partial(game_start, widgets, widgets[widgets.index(game_status)])
+                       )
+    done.place (x = 550, y = (wd_height/3), width = 200, height = 75)
     widgets.append(done)
-
-def all_ships(widgets):
-    global ship_counter
     
-    if ship_counter == 20:
-        game_wd(widgets)
-    else:
-        not_enough =  tk.Label(window,
-                     text = "Not enough ships ♥",
-                     font =("Arial Black",16),
-                     bg = bg_blue,
-                     fg = "red"
-                     )
+    your_ships = tk.Label(window, text = "Your ships: " + str(ship_counter), 
+                          font = ("Arial Black",20),
+                          bg = sea_blue, 
+                          fg = ship_counter_colors[ship_counter])
+    your_ships.place(x = 0, y = (wd_height-55))
     
-        not_enough.place(x = 550,
-                         y = ((wd_height/3) + 80))
 
-        widgets.append(not_enough)
-
-#_____Game Window_____________________________________________________________#
-def game_wd(widgets):
-    killer(widgets)
-    button_grid_EN(my_pole, "disabled")
+#_____Game Starter____________________________________________________________#
+def game_start(widgets, game_status):
+    global ready_status
     
+    if ship_counter < ship_number:
+        game_status.configure(text = "Not enough ships ♥")
+        return
+        
     if mode == "CLIENT":
+        response = client(ip_adr, START_REQUEST)        # Wait for server
+        if response == [0]:
+            game_status.configure(text = "Server is not ready")
+            return
+        
         client(ip_adr, SHIP_LAYOUT, my_grid)
         client(ip_adr, SHIP_LAYOUT_REQUEST)
         client_timer()
+        
+    ready_status = 1
+    game_wd(widgets)        
+
+#_____Game Window_____________________________________________________________#
+def game_wd(widgets):
+    global your_turn_label
     
-    wd_width = 1150
-    wd_height = 600
+    killer(widgets)
+    button_grid_EN(my_pole, "disabled")
+    
+    wd_width = 1110
     wd_size =(str(wd_width),"x",str(wd_height))
     window.geometry("".join(wd_size))
     
@@ -595,13 +616,19 @@ def game_wd(widgets):
                      bg = bg_blue,
                      fg = "white"
                      )
-    
     title.pack()
-
+    button_grid(destroy_ships,tile_x = 600,tile_y = 65, pole = enemy_pole)
     widgets.append(title)
     
-    button_grid(destroy_ships,tile_x = 600,tile_y = 65, pole = enemy_pole)
+    your_turn_label = tk.Label(window, text = your_turn_text[your_turn], 
+                          font = ("Arial Black",20),
+                          bg = sea_blue, 
+                          fg = your_turn_colors[your_turn])
+    your_turn_label.place(x = 600, y = (wd_height-55))
 
 #_____Main____________________________________________________________________#
+import os
+os.system("mode con cols=20 lines=2")
+
 main_menu()
 window.mainloop()
