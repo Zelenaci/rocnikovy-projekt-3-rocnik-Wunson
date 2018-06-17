@@ -19,6 +19,7 @@ SHIP_LAYOUT_REQUEST = "R"
 SHOT = "S"
 SHOT_REQUEST = "K"
 START_REQUEST = "T"
+DIED = "D"
 MESSAGE = "M"
 NOTHING = "X"
 
@@ -76,6 +77,8 @@ ship_counter_colors = ["#FF0000", "#FF0000", "#FC1D03", "#F93906", "#F75409",
                        "#E7DC1A", "#DAE41D", "#C3E21F", "#ADDF22", "#99DC24", 
                        "#85DA27", "#72D729", "#61D42B", "#50D22D", "#40CF2F", 
                        "#32CD32"]
+your_turn_text =      ["Enemy turn", "Your turn!"]
+your_turn_colors =    ["red", "lime"]
 
 #-----C O M M U N I C A T I O N-------------------------------------------------------------------#
 def rx(soc):  
@@ -233,7 +236,7 @@ window.title("Lode")
 
 # Window Size
 wd_width = 800
-wd_height = 600
+wd_height = 640
 wd_size =(str(wd_width),"x",str(wd_height))
 window.geometry("".join(wd_size))
 #_____________________________________________________________________________#
@@ -261,7 +264,7 @@ def destroy_ships(x, y, enemy = True):  # Placen't ships
     global your_turn
     colors = [u_missed, killed_red]
     
-    if shot_buffer == []:               # Only if ship buffer is empty
+    if shot_buffer == []:               # Only if shot buffer is empty
         if enemy and your_turn:
             visible_grid = enemy_grid
             hidden_grid = enemy_grid_hidden
@@ -286,6 +289,7 @@ def destroy_ships(x, y, enemy = True):  # Placen't ships
                     your_ships_update("You died!")
             
             your_turn = not (enemy ^ h)                 # XNOR function, calculate if you on turn
+            your_turn_update(your_turn_text[your_turn]) # Update label on screen
             pole[x][y].configure(bg = colors[h], state = "disabled")    # Update button state
             visible_grid[x][y] = h + 2                  # Update ship table (grid)
         
@@ -315,6 +319,9 @@ def button_grid(function,tile_x = 0,tile_y = 0, pole = my_pole):
 #_____________________________________________________________________________#
 def your_ships_update(txt):
     your_ships.configure(text = txt, fg = ship_counter_colors[ship_counter])
+
+def your_turn_update(txt):
+    your_turn_label.configure(text = txt, fg=your_turn_colors[your_turn])
 
 def button_grid_EN(pole, state = "disabled"):
     for x in pole:
@@ -557,10 +564,11 @@ def place_wd(widgets):
     widgets.append(done)
     
     your_ships = tk.Label(window, text = "Your ships: " + str(ship_counter), 
-                          font = ("Arial Black",10),
-                          bg = bg_blue, 
+                          font = ("Arial Black",20),
+                          bg = sea_blue, 
                           fg = ship_counter_colors[ship_counter])
-    your_ships.place (x = 0, y = (wd_height-25))
+    your_ships.place(x = 0, y = (wd_height-55))
+    
 
 #_____Game Starter____________________________________________________________#
 def game_start(widgets, game_status):
@@ -585,11 +593,12 @@ def game_start(widgets, game_status):
 
 #_____Game Window_____________________________________________________________#
 def game_wd(widgets):
+    global your_turn_label
+    
     killer(widgets)
     button_grid_EN(my_pole, "disabled")
     
-    wd_width = 1150
-    wd_height = 600
+    wd_width = 1110
     wd_size =(str(wd_width),"x",str(wd_height))
     window.geometry("".join(wd_size))
     
@@ -602,6 +611,12 @@ def game_wd(widgets):
     title.pack()
     button_grid(destroy_ships,tile_x = 600,tile_y = 65, pole = enemy_pole)
     widgets.append(title)
+    
+    your_turn_label = tk.Label(window, text = your_turn_text[your_turn], 
+                          font = ("Arial Black",20),
+                          bg = sea_blue, 
+                          fg = your_turn_colors[your_turn])
+    your_turn_label.place(x = 600, y = (wd_height-55))
 
 #_____Main____________________________________________________________________#
 import os
