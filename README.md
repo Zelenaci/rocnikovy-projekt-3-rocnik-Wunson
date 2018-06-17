@@ -1,7 +1,16 @@
 # PRG -- Ročníkový projekt, 3. ročník
 ## Hra lodě
 
-1. Hra lodě s podporou multiplayeru přes LAN
-1. Grafické prostředí
-1. Ingame chat
-1. Cool sounds
+* Grafické prostředí
+* Multiplayer přes LAN
+
+## O autorech:
+### Wunson
+* Main designer
+* GUI specialist
+* [HR manager](https://cs.wikipedia.org/wiki/Lidsk%C3%A9_zdroje)
+
+### Vasa
+* Cross platform director
+* Core production
+* Comment manager

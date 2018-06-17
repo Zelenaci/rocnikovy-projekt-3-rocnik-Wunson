@@ -71,6 +71,7 @@ enemy_grid_hidden = [[0,0,0,0,0,0,0,0,0,0],
                      [0,0,0,0,0,0,0,0,0,0],
                      [0,0,0,0,0,0,0,0,0,0]]
 
+enemy_ship_counter = ship_number
 ship_counter = 0    # Number of placed ships
 ship_counter_colors = ["#FF0000", "#FF0000", "#FC1D03", "#F93906", "#F75409", 
                        "#F46E0C", "#F1860F", "#EF9D12", "#ECB315", "#E7DC1A", 
@@ -260,6 +261,7 @@ def destroy_ships(x, y, enemy = True):  # Placen't ships
     global enemy_grid
     global my_grid
     global ship_counter
+    global enemy_ship_counter
     global shot_buffer
     global your_turn
     colors = [u_missed, killed_red]
@@ -282,14 +284,20 @@ def destroy_ships(x, y, enemy = True):  # Placen't ships
         if (enemy and your_turn) or not enemy:
             h = hidden_grid[x][y]                       # handler
             
+            your_turn = not (enemy ^ h)                 # XNOR function, calculate if you on turn
+            your_turn_update(your_turn_text[your_turn]) # Update label on screen
+            
             if h and (not enemy) and (ship_counter > 0):
                 ship_counter -= 1
                 your_ships_update("Your ships: " + str(ship_counter))
                 if ship_counter == 0:
                     your_ships_update("You died!")
+                    
+            elif h and enemy and (enemy_ship_counter > 0):
+                enemy_ship_counter -= 1
+                if enemy_ship_counter == 0:
+                    your_turn_update("You win!")
             
-            your_turn = not (enemy ^ h)                 # XNOR function, calculate if you on turn
-            your_turn_update(your_turn_text[your_turn]) # Update label on screen
             pole[x][y].configure(bg = colors[h], state = "disabled")    # Update button state
             visible_grid[x][y] = h + 2                  # Update ship table (grid)
         
