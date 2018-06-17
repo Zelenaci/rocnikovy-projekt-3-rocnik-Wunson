@@ -8,7 +8,7 @@
 ### Wunson
 * Main designer
 * GUI specialist
-* [HR manager](https://cs.wikipedia.org/wiki/Lidsk%C3%A9_zdroje){:target="_blank"}
+* <a href="https://cs.wikipedia.org/wiki/Lidsk%C3%A9_zdroje" target="_blank">HR manager</a>
 
 ### Vasa
 * Cross platform director
